@@ -14,13 +14,14 @@ let page = 0;
 form.addEventListener("submit", search)
 
 function search(e) {
-    gallery.innerHTML = "";
+    try {
+        gallery.innerHTML = "";
     button.classList.remove("block");
     e.preventDefault();
-    if (e.action = input.value === '') {
+    name = input.value.trim()
+    if (input.value.trim() === '') {
         return Notify.failure("Sorry, there are no images matching your search query. Please try again.")
     }
-    name = e.action = input.value;
     page += 1;
     fetchPhotos(name, images, page)
         .then(response => {
@@ -30,53 +31,54 @@ function search(e) {
             return create(response), button.classList.add("block"), button.disabled = false
         }
         })
-        .catch (error => {
-            Notify.failure (
+    } catch (error) {
+        Notify.failure (
                'Sorry, there are no images matching your search query. Please try again.'
             );
-        });
+    }
 }
 
 
-function create(array) {
-    const card = array.data.hits
+function create(arr) {
+    const card = arr.data.hits
         .map(({
-            url,
-            tag,
-            like,
-            view,
-            comment,
-            download,
+            previewURL,
+            tags,
+            likes,
+            views,
+            comments,
+            downloads,
         }) => {
             return `<div class="photo-card">
-  <img src="${url}" alt="${tag}" loading="lazy" width="300" />
+  <img src="${previewURL}" alt="${tags}" loading="lazy" width="300" />
   <div class="info">
     <p class="info-item">
       <b>Likes</b>
-      ${like}
+      ${likes}
     </p>
     <p class="info-item">
       <b>Views</b>
-      ${view}
+      ${views}
     </p>
     <p class="info-item">
       <b>Comments</b>
-      ${comment}
+      ${comments}
     </p>
     <p class="info-item">
       <b>Downloads</b>
-      ${download}
+      ${downloads}
     </p>
   </div>
 </div>`}).join("");
+    console.log(arr.data.hits)
     return gallery.insertAdjacentHTML ('beforeend', card)
 }
 
 button.addEventListener("click", load)
 
 function load(e) {
-    e.preventDefault();
-    page += 1;
+    try {
+        page += 1;
     fetchPhotos(name, images, page)
         .then(response => {
            if (!response.data.hits.length>0) {
@@ -85,17 +87,18 @@ function load(e) {
                return create(response), hidden(response.data.totalHits);
         }
         })
-        .catch (error => {
-            Notify.failure (
+    } catch (error) {
+        Notify.failure (
                'Sorry, there are no images matching your search query. Please try again.'
             );
-        });
+    }
 }
+
 
 function hidden(total1) {
     const total2 = images * page;
     if (total1 > total2) {
-        button.disabled = true, Notify.failure("We're sorry, but you've reached the end of search results.")
+        button.disabled = true,
+        Notify.failure("We're sorry, but you've reached the end of search results.")
     }
-    return;
 }
